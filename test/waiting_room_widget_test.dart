@@ -36,11 +36,14 @@ void main() {
     await localDb.close();
   });
 
-  Future<void> pumpRealAsync(WidgetTester tester, [int ms = 200]) async {
-    await tester.runAsync(() async {
-      await Future.delayed(Duration(milliseconds: ms));
-    });
-    await tester.pump();
+  Future<void> pumpUntil(WidgetTester tester, bool Function() condition,
+      {int timeoutMs = 3000}) async {
+    final stopWatch = Stopwatch()..start();
+    while (!condition() && stopWatch.elapsedMilliseconds < timeoutMs) {
+      await tester.runAsync(
+          () => Future.delayed(const Duration(milliseconds: 50)));
+      await tester.pump();
+    }
     await tester.pump(const Duration(milliseconds: 50));
   }
 
@@ -53,13 +56,13 @@ void main() {
         child: const WaitingRoomApp(),
       ),
     );
-    await pumpRealAsync(tester, 100);
+    await pumpUntil(tester, () => true, timeoutMs: 100);
 
     // ACT
     await tester.enterText(find.byType(TextField), 'Alice');
     await tester.pump();
     await tester.tap(find.byType(ElevatedButton));
-    await pumpRealAsync(tester, 200);
+    await pumpUntil(tester, () => provider.clients.isNotEmpty);
 
     // ASSERT
     expect(find.text('Alice'), findsOneWidget);
@@ -76,18 +79,18 @@ void main() {
         child: const WaitingRoomApp(),
       ),
     );
-    await pumpRealAsync(tester, 100);
+    await pumpUntil(tester, () => true, timeoutMs: 100);
 
     await tester.enterText(find.byType(TextField), 'Bob');
     await tester.pump();
     await tester.tap(find.byType(ElevatedButton));
-    await pumpRealAsync(tester, 200);
+    await pumpUntil(tester, () => provider.clients.isNotEmpty);
 
     expect(find.text('Bob'), findsOneWidget);
 
     // ACT
     await tester.tap(find.byIcon(Icons.delete));
-    await pumpRealAsync(tester, 200);
+    await pumpUntil(tester, () => provider.clients.isEmpty);
 
     // ASSERT
     expect(find.text('Bob'), findsNothing);
@@ -104,22 +107,22 @@ void main() {
         child: const WaitingRoomApp(),
       ),
     );
-    await pumpRealAsync(tester, 100);
+    await pumpUntil(tester, () => true, timeoutMs: 100);
 
     // Add two clients to the list first
     await tester.enterText(find.byType(TextField), 'Client A');
     await tester.pump();
     await tester.tap(find.byType(ElevatedButton));
-    await pumpRealAsync(tester, 200);
+    await pumpUntil(tester, () => provider.clients.length == 1);
 
     await tester.enterText(find.byType(TextField), 'Client B');
     await tester.pump();
     await tester.tap(find.byType(ElevatedButton));
-    await pumpRealAsync(tester, 200);
+    await pumpUntil(tester, () => provider.clients.length == 2);
 
     // ACT
     await tester.tap(find.byKey(const Key('nextClientButton')));
-    await pumpRealAsync(tester, 200);
+    await pumpUntil(tester, () => provider.clients.length == 1);
 
     // ASSERT
     expect(find.text('Client A'), findsNothing);
