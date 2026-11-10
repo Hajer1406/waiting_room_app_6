@@ -35,8 +35,8 @@ void main() async {
       );
       supabaseClient = Supabase.instance.client;
 
-      // Attempt anonymous sign-in in the background
-      supabaseClient.auth.signInAnonymously().catchError((_) => null);
+      // Attempt anonymous sign-in in the background (fire-and-forget)
+      supabaseClient.auth.signInAnonymously().ignore();
     } catch (e) {
       debugPrint('Supabase initialization error: $e');
     }

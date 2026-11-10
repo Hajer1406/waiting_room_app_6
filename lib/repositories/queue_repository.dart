@@ -1,6 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/client.dart';
-import '../models/sync_status.dart';
 import '../storage/local_queue_storage.dart';
 
 class QueueRepository {

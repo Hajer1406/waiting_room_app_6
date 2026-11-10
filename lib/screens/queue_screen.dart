@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/app_connectivity.dart';
 import '../models/queue_state.dart';
 import '../providers/connectivity_provider.dart';
 import '../providers/queue_provider.dart';
@@ -81,15 +80,15 @@ class _QueueScreenState extends State<QueueScreen> {
             onPressed: () async {
               try {
                 final syncService = context.read<SyncService?>();
+                final queueProvider = context.read<QueueProvider>();
+                final messenger = ScaffoldMessenger.of(context);
                 if (syncService != null) {
                   await syncService.synchronize();
                 }
-                if (context.mounted) {
-                  await context.read<QueueProvider>().refresh();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Synchronization completed')),
-                  );
-                }
+                await queueProvider.refresh();
+                messenger.showSnackBar(
+                  const SnackBar(content: Text('Synchronization completed')),
+                );
               } catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
