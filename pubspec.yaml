@@ -42,6 +42,8 @@ dependencies:
   path: ^1.8.3             # Path manipulation utilities
   geolocator: ^11.0.0      # Device GPS/location
   uuid: ^4.0.0             # Generate unique IDs offline
+  connectivity_plus: ^7.3.2
+  mocktail: ^1.0.5
   
 
 dev_dependencies:

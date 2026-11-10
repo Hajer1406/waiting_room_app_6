@@ -3,8 +3,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:waiting_room_app/models/client.dart';
 import 'package:waiting_room_app/providers/queue_provider.dart';
+import 'package:waiting_room_app/repositories/queue_repository.dart';
 import 'package:waiting_room_app/services/geolocation_service.dart';
-import 'package:waiting_room_app/services/local_queue_service.dart';
+import 'package:waiting_room_app/storage/local_queue_storage.dart';
 
 class _FakeGeoService extends GeolocationService {
   @override
@@ -60,20 +61,18 @@ void main() {
   });
 
   group('QueueProvider Local & Unit Tests', () {
-    late LocalQueueService localDb;
+    late LocalQueueStorage storage;
     late QueueProvider provider;
 
     setUp(() {
-      localDb = LocalQueueService(inMemory: true);
-      provider = QueueProvider(
-        geoService: _FakeGeoService(),
-        localDb: localDb,
-      );
+      storage = LocalQueueStorage(inMemory: true);
+      final repo = QueueRepository(supabase: null, storage: storage);
+      provider = QueueProvider(repo, _FakeGeoService());
     });
 
     tearDown(() async {
       provider.dispose();
-      await localDb.close();
+      await storage.close();
     });
 
     test('should add a client to the queue', () async {
